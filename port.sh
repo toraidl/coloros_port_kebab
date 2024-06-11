@@ -392,6 +392,13 @@ cp -rf build/baserom/images/my_product/etc/extension/sys_game_manager_config.jso
     echo "persist.oplus.display.vrr=1"
     echo "persist.oplus.display.initskipconfig=1"
 } >> build/portrom/images/my_product/build.prop 
+# bootanimation
+cp -rf build/baserom/images/my_product/media/bootanimation/* build/portrom/images/my_product/media/bootanimation/
+
+rm -rf  build/portrom/images/my_product/overlay/*"${port_my_product_type}".apk
+for overlay in $(find build/baserom/images/ -type f -name "*${base_my_product_type}*".apk);do
+    cp -rf $overlay build/portrom/images/my_product/overlay/
+done
 
 #自定义替换
 
