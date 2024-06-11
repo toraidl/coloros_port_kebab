@@ -351,6 +351,9 @@ for prop in $(find build/portrom/images/my_product -type f -name "build.prop");d
 done
 
 
+# fix bootloop
+cp -rf build/baserom/images/my_product/etc/extension/sys_game_manager_config.json build/portrom/images/my_product/etc/extension/
+
 #自定义替换
 
 #Devices/机型代码/overlay 按照镜像的目录结构，可直接替换目标。
