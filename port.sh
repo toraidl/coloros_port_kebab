@@ -354,6 +354,45 @@ done
 # fix bootloop
 cp -rf build/baserom/images/my_product/etc/extension/sys_game_manager_config.json build/portrom/images/my_product/etc/extension/
 
+#cp -rf build/baserom/images/my_product/build.prop build/portrom/images/my_product/build.prop
+
+{
+    echo ""
+    echo "ro.oplus.display.screenSizeInches.primary=6.55"
+    echo "ro.display.rc.size=90,90,90,90"
+    echo "ro.oplus.display.rc.size=90,90,90,90"
+    echo "ro.oppo.screen.heteromorphism=0,0:165,103"
+    echo "ro.oplus.display.screen.heteromorphism=0,0:165,103"
+    echo "ro.oppo.screenhole.positon=67,36:132,101"
+    echo "ro.oplus.display.screenhole.positon=67,36:132,101"
+    echo "ro.display.underscreen.lightsensor.support=1"
+    echo "ro.lcd.display.screen.underlightsensor.region=704,0,778,100"
+    echo "ro.oplus.lcd.display.screen.underlightsensor.region=704,0,778,100"
+    echo "ro.display.brightness.hbm_xs=30000,32000,34000,36000,38000,40000,42000,44000,46000,48000,50000"
+    echo "ro.display.brightness.hbm_xs_min=20000,22000,24000,26000,28000,30000,32000,34000,36000,38000,40000"
+    echo "ro.display.brightness.hbm_xs_max=40000,42000,44000,46000,48000,50000,52000,54000,56000,58000,60000"
+    echo "ro.oplus.display.brightness.xs=0,1,2,3,8,16,36,60,100,260,540,1000,2250,4600,5900,8600,10000,12000,16000,20000"
+    echo "ro.oplus.display.brightness.ys=212,629,981,1332,2144,2702,3536,3673,3841,4204,4659,5088,6056,6731,6933,7220,7360,7535,7869,8191"
+    echo "ro.oplus.display.brightness.hbm_ys=8212,8272,8332,8392,8492,8592,8692,8792,9192,9792,10238"
+    echo "ro.oplus.display.brightness.default_brightness=3758"
+    echo "ro.oplus.display.brightness.normal_max_brightness=8191"
+    echo "ro.oplus.display.brightness.max_brightness=10238"
+    echo "ro.oplus.display.brightness.normal_min_brightness=16"
+    echo "ro.oplus.display.brightness.min_light_in_dnm=894,894"
+    echo "ro.oplus.display.brightness.smooth=true"
+    echo "ro.display.brightness.brightness.mode=1"
+    echo "ro.display.brightness.mode.exp.per_20=3860"
+    echo "ro.vendor.display.AIRefreshRate.brightness=200"
+    echo "ro.oplus.display.dwb.threshold=true"
+    echo "ro.oplus.display.colormode.vivid=102"
+    echo "ro.oplus.display.colormode.soft=101"
+    echo "ro.oplus.display.colormode.cinema=101"
+    echo "ro.oplus.display.colormode.colorful=100"
+    echo "vendor.display.use_layer_ext=1"
+    echo "persist.oplus.display.vrr=1"
+    echo "persist.oplus.display.initskipconfig=1"
+} >> build/portrom/images/my_product/build.prop 
+
 #自定义替换
 
 #Devices/机型代码/overlay 按照镜像的目录结构，可直接替换目标。
