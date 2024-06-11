@@ -221,6 +221,10 @@ else
     is_ab_device=false
 
 fi
+
+rm -rf build/portrom/images/my_manifest
+cp -rf build/baserom/images/my_manifest build/portrom/images/
+cp -rf build/baserom/images/config/my_manifest_* build/portrom/images/config/
 rm -rf build/portrom/images/product/etc/auto-install*
 rm -rf build/portrom/images/system/verity_key
 rm -rf build/portrom/images/vendor/verity_key
