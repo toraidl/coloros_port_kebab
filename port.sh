@@ -340,6 +340,17 @@ done
 #sed -i -e '$a\'$'\n''persist.sys.usb.config=mtp,adb' build/portrom/images/system/system/build.prop
 #sed -i -e '$a\'$'\n''persist.sys.disable_rescue=true' build/portrom/images/system/system/build.prop
 
+[ -z ${base_rom_density} ] && base_rom_density=480
+
+found=0
+for prop in $(find build/portrom/images/my_product -type f -name "build.prop");do
+    if grep -q "ro.sf.lcd_density" ${prop};then
+        sed -i "s/ro.sf.lcd_density=.*/ro.sf.lcd_density=${base_rom_density}/g" ${prop}
+        found=1
+    fi
+done
+
+
 #自定义替换
 
 #Devices/机型代码/overlay 按照镜像的目录结构，可直接替换目标。
