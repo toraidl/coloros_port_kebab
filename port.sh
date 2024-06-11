@@ -226,6 +226,33 @@ rm -rf build/portrom/images/my_manifest
 cp -rf build/baserom/images/my_manifest build/portrom/images/
 cp -rf build/baserom/images/config/my_manifest_* build/portrom/images/config/
 sed -i "s/ro.build.display.id=.*/ro.build.display.id=${target_display_id}/g" build/portrom/images/my_manifest/build.prop
+
+if [[ ! -d tmp ]];then
+    mkdir -p tmp/
+fi
+
+ mkdir -p tmp/services/
+ cp -rf build/portrom/images/system/system/framework/services.jar tmp/services.jar
+
+java -jar bin/apktool/APKEditor.jar d -f -i tmp/services.jar -o tmp/services  > /dev/null 2>&1
+declare -A smali_to_methods=()
+
+smali_to_methods[ScanPackageUtils]="--assertMinSignatureSchemeIsValid"
+
+for smali in ${!smali_to_methods[@]}; do
+    target_file=$(find tmp/services -type f -name "${smali}.smali")
+    echo "smali is $smali"
+    echo "target_file is $target_file"
+    if [[ -f $target_file ]]; then
+        methods=${smali_to_methods[$smali]}
+        for method in $methods; do 
+            python3 bin/patchmethod.py $target_file $method && blue "${target_file}  修改成功" "${target_file} patched"
+        done
+    fi
+done
+
+java -jar bin/apktool/APKEditor.jar b -f -i tmp/services -o tmp/services_patched.jar > /dev/null 2>&1
+cp -rf tmp/services_patched.jar build/portrom/images/system/system/framework/services.jar
 rm -rf build/portrom/images/product/etc/auto-install*
 rm -rf build/portrom/images/system/verity_key
 rm -rf build/portrom/images/vendor/verity_key
