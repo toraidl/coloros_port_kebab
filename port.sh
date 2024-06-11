@@ -274,6 +274,22 @@ target_method='getMinimumSignatureSchemeVersionForTargetSdk'
 
 java -jar bin/apktool/APKEditor.jar b -f -i tmp/services -o tmp/services_patched.jar > /dev/null 2>&1
 cp -rf tmp/services_patched.jar build/portrom/images/system/system/framework/services.jar
+
+yellow "删除多余的App" "Debloating..." 
+# List of apps to be removed
+
+debloat_apps=("Update" "OTA")
+
+for debloat_app in "${debloat_apps[@]}"; do
+    # Find the app directory
+    app_dir=$(find build/portrom/images/ -type d -name "*$debloat_app*")
+    
+    # Check if the directory exists before removing
+    if [[ -d "$app_dir" ]]; then
+        yellow "删除目录: $app_dir" "Removing directory: $app_dir"
+        rm -rf "$app_dir"
+    fi
+done
 rm -rf build/portrom/images/product/etc/auto-install*
 rm -rf build/portrom/images/system/verity_key
 rm -rf build/portrom/images/vendor/verity_key
