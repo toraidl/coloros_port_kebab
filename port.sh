@@ -275,6 +275,11 @@ target_method='getMinimumSignatureSchemeVersionForTargetSdk'
 java -jar bin/apktool/APKEditor.jar b -f -i tmp/services -o tmp/services_patched.jar > /dev/null 2>&1
 cp -rf tmp/services_patched.jar build/portrom/images/system/system/framework/services.jar
 
+#Unlock AI CAll
+patch_smali "HeyTapSpeechAssist.apk" "jc/a.smali" "PHY120" "KB2000"
+
+patch_smali "HeyTapSpeechAssist.apk" "tc/a.smali" "PHY120" "KB2000"
+
 yellow "删除多余的App" "Debloating..." 
 # List of apps to be removed
 
