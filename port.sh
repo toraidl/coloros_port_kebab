@@ -399,6 +399,15 @@ cp -rf  build/baserom/images/my_product/etc/permissions/* build/portrom/images/m
 cp -rf  build/baserom/images/my_product/etc/refresh_rate_config.xml build/portrom/images/my_product/etc/refresh_rate_config.xml
 cp -rf  build/baserom/images/my_product/non_overlay build/portrom/images/my_product/non_overlay
 cp -rf  build/baserom/images/my_product/etc/sys_resolution_switch_config.xml build/portrom/images/my_product/etc/sys_resolution_switch_config.xml
+
+ # Camera
+cp -rf  build/baserom/images/my_product/etc/camera/* build/portrom/images/my_product/etc/camera
+cp -rf  build/baserom/images/my_product/vendor/etc/* build/portrom/images/my_product/vendor/etc/
+
+rm -rf  build/portrom/images/my_product/priv-app/*
+rm -rf  build/portrom/images/my_product/app/OplusCamera
+cp -rf build/baserom/images/my_product/priv-app/* build/portrom/images/my_product/priv-app
+
 # bootanimation
 cp -rf build/baserom/images/my_product/media/bootanimation/* build/portrom/images/my_product/media/bootanimation/
 
