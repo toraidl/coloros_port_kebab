@@ -415,6 +415,14 @@ rm -rf  build/portrom/images/my_product/overlay/*"${port_my_product_type}".apk
 for overlay in $(find build/baserom/images/ -type f -name "*${base_my_product_type}*".apk);do
     cp -rf $overlay build/portrom/images/my_product/overlay/
 done
+baseCarrierConfigOverlay=$(find build/baserom/images/ -type f -name "CarrierConfigOverlay*.apk")
+portCarrierConfigOverlay=$(find build/portrom/images/ -type f -name "CarrierConfigOverlay*.apk")
+if [ -f "${baseCarrierConfigOverlay}" ] && [ -f "${portCarrierConfigOverlay}" ];then
+    blue "正在替换 [CarrierConfigOverlay.apk]" "Replacing [CarrierConfigOverlay.apk]"
+    rm -rf ${portCarrierConfigOverlay}
+    cp -rf ${baseCarrierConfigOverlay} $(dirname ${portCarrierConfigOverlay})
+fi
+
 
 #自定义替换
 
