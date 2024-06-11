@@ -55,10 +55,10 @@ if "%LANG%"=="Chinese" (
 )
 
 :: 获取设备代码
-for /f "tokens=2 delims=: " %%i in ('fastboot %* getvar product 2^>^&1') do set "product=%%i"
+for /f "tokens=2 delims=: " %%i in ('fastboot %* getvar product 2^>^&1 ^| findstr /r /c:"^product: "') do set "product=%%i"
 
 :: 预期设备代码
-set "expected_device_code=device_code"
+set "expected_device=device_code"
 
 :: 设置语言相关的消息
 if "%LANG%"=="Chinese" (
@@ -74,7 +74,7 @@ if "%LANG%"=="Chinese" (
 )
 
 :: 检查是否匹配
-if /i "!product!" neq "%expected_device_code%" (
+if /i "!product!" neq "%expected_device%" (
     echo %msg_mismatch%
     set /p "choice=%msg_continue%"
     if /i "!choice!" neq "y" (
