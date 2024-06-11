@@ -423,6 +423,16 @@ if [ -f "${baseCarrierConfigOverlay}" ] && [ -f "${portCarrierConfigOverlay}" ];
     cp -rf ${baseCarrierConfigOverlay} $(dirname ${portCarrierConfigOverlay})
 fi
 
+# fix fingerprint & face unlock
+for feature in android.hardware.biometrics.face android.hardware.fingerprint;do
+    if ! xmlstarlet sel -t -c "//permissions/feature[@name='$feature']"  build/portrom/images/my_product/etc/permissions/com.oplus.android-features.xml  >/dev/null 2>&1;then 
+        echo "Adding feature $feature"
+        xmlstarlet ed -L -s "//permissions" -t elem -n feature -v "" \
+            -i "//permissions/feature[last()]" -t attr -n "name" -v "$feature" build/portrom/images/my_product/etc/permissions/com.oplus.android-features.xml
+
+    fi
+done
+
 
 #自定义替换
 
