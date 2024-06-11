@@ -1,0 +1,157 @@
+#!/sbin/sh
+ui_print() { $BOOTMODE && echo "$1" || echo -e "ui_print $1\nui_print" >> $OUTFD; }
+abort() { ui_print "$1"; ui_print " "; exit 1; }
+OUTFD=/proc/self/fd/$2
+ZIPFILE="$3"
+tmp=/dev/tmp
+
+
+set -x
+rm -rf $tmp
+mkdir -p $tmp
+
+package_extract_file() {
+  ui_print "- 正在刷写分区 $(echo $2 | cut -d '/' -f 6) "
+  unzip -p "$ZIPFILE" $1 >$2
+}
+
+package_extract_zstd() {
+  ui_print "- 正在刷写分区 $(echo $2 | cut -d '/' -f 6) "
+  unzip -p "$ZIPFILE" $1 | /dev/tmp/META-INF/zstd -c -d >$2
+}
+
+# Device check
+supported=false
+ui_print "Checking device compatibility..."
+for i in 19805 20809; do
+  for prop in "ro.boot.prjname" "ro.boot.project_name"; do
+    if [ "$(getprop $prop)" == "$i" ]; then
+      ui_print "- Supported Device detected"
+      supported=true
+      break 2
+    fi
+  done
+done
+$supported || abort "- Unsupported device! Aborting!"
+
+ddr4=false
+ddr5=false
+ui_print "Checking RAM type..."
+if [ "$(cat /proc/devinfo/ddr_type | grep -i DDR4)" ]; then
+  ddr4=true
+  ui_print "- DDR4 RAM detected!"
+elif [ "$(cat /proc/devinfo/ddr_type | grep -i DDR5)" ]; then
+  ddr5=true
+  ui_print "- DDR5 RAM detected!"
+elif [ "$(getprop ro.boot.ddr_type | grep -i 0)" ]; then
+  ddr4=true
+  ui_print "- DDR4 RAM detected!"
+elif [ "$(getprop ro.boot.ddr_type | grep -i 1)" ]; then
+  ddr5=true
+  ui_print "- DDR5 RAM detected!"
+else  ui_print "- Could not detect RAM type. Flashing aborted!" 
+  exit 0
+fi
+
+ui_print " "
+ui_print "****************************"
+ui_print "Device: Oneplus 8T"
+ui_print "Region: CN"
+ui_print "Flashing Firmware to both slots A and B..."
+ui_print " "
+ui_print "Updating modem..."
+package_extract_file "firmware-update/modem.img" "/dev/block/bootdevice/by-name/modem_a"
+package_extract_file "firmware-update/modem.img" "/dev/block/bootdevice/by-name/modem_b"
+ui_print "Updating abl..."
+package_extract_file "firmware-update/abl.img" "/dev/block/bootdevice/by-name/abl_a"
+package_extract_file "firmware-update/abl.img" "/dev/block/bootdevice/by-name/abl_b"
+ui_print "Updating aop..."
+package_extract_file "firmware-update/aop.img" "/dev/block/bootdevice/by-name/aop_a"
+package_extract_file "firmware-update/aop.img" "/dev/block/bootdevice/by-name/aop_b"
+ui_print "Updating bluetooth..."
+package_extract_file "firmware-update/bluetooth.img" "/dev/block/bootdevice/by-name/bluetooth_a"
+package_extract_file "firmware-update/bluetooth.img" "/dev/block/bootdevice/by-name/bluetooth_b"
+ui_print "Updating cmnlib..."
+package_extract_file "firmware-update/cmnlib.img" "/dev/block/bootdevice/by-name/cmnlib_a"
+package_extract_file "firmware-update/cmnlib.img" "/dev/block/bootdevice/by-name/cmnlib_b"
+ui_print "Updating cmnlib64..."
+package_extract_file "firmware-update/cmnlib64.img" "/dev/block/bootdevice/by-name/cmnlib64_a"
+package_extract_file "firmware-update/cmnlib64.img" "/dev/block/bootdevice/by-name/cmnlib64_b"
+ui_print "Updating devcfg..."
+package_extract_file "firmware-update/devcfg.img" "/dev/block/bootdevice/by-name/devcfg_a"
+package_extract_file "firmware-update/devcfg.img" "/dev/block/bootdevice/by-name/devcfg_b"
+ui_print "Updating dsp..."
+package_extract_file "firmware-update/dsp.img" "/dev/block/bootdevice/by-name/dsp_a"
+package_extract_file "firmware-update/dsp.img" "/dev/block/bootdevice/by-name/dsp_b"
+ui_print "Updating featenabler..."
+package_extract_file "firmware-update/featenabler.img" "/dev/block/bootdevice/by-name/featenabler_a"
+package_extract_file "firmware-update/featenabler.img" "/dev/block/bootdevice/by-name/featenabler_b"
+ui_print "Updating hyp..."
+package_extract_file "firmware-update/hyp.img" "/dev/block/bootdevice/by-name/hyp_a"
+package_extract_file "firmware-update/hyp.img" "/dev/block/bootdevice/by-name/hyp_b"
+ui_print "Updating imagefv..."
+package_extract_file "firmware-update/imagefv.img" "/dev/block/bootdevice/by-name/imagefv_a"
+package_extract_file "firmware-update/imagefv.img" "/dev/block/bootdevice/by-name/imagefv_b"
+ui_print "Updating keymaster..."
+package_extract_file "firmware-update/keymaster.img" "/dev/block/bootdevice/by-name/keymaster_a"
+package_extract_file "firmware-update/keymaster.img" "/dev/block/bootdevice/by-name/keymaster_b"
+ui_print "Updating logo..."
+package_extract_file "firmware-update/logo.img" "/dev/block/bootdevice/by-name/logo_a"
+package_extract_file "firmware-update/logo.img" "/dev/block/bootdevice/by-name/logo_b"
+ui_print "Updating mdm_oem_stanvbk..."
+package_extract_file "firmware-update/mdm_oem_stanvbk.img" "/dev/block/bootdevice/by-name/mdm_oem_stanvbk"
+ui_print "Updating multiimgoem..."
+package_extract_file "firmware-update/multiimgoem.img" "/dev/block/bootdevice/by-name/multiimgoem_a"
+package_extract_file "firmware-update/multiimgoem.img" "/dev/block/bootdevice/by-name/multiimgoem_b"
+ui_print "Updating qupfw..."
+package_extract_file "firmware-update/qupfw.img" "/dev/block/bootdevice/by-name/qupfw_a"
+package_extract_file "firmware-update/qupfw.img" "/dev/block/bootdevice/by-name/qupfw_b"
+ui_print "Updating spunvm..."
+package_extract_file "firmware-update/spunvm.img" "/dev/block/bootdevice/by-name/spunvm"
+ui_print "Updating storsec..."
+package_extract_file "firmware-update/storsec.img" "/dev/block/bootdevice/by-name/storsec_a" 
+package_extract_file "firmware-update/storsec.img" "/dev/block/bootdevice/by-name/storsec_b"
+ui_print "Updating tz..."
+package_extract_file "firmware-update/tz.img" "/dev/block/bootdevice/by-name/tz_a"
+package_extract_file "firmware-update/tz.img" "/dev/block/bootdevice/by-name/tz_b"
+ui_print "Updating uefisecapp..."
+package_extract_file "firmware-update/uefisecapp.img" "/dev/block/bootdevice/by-name/uefisecapp_a"
+package_extract_file "firmware-update/uefisecapp.img" "/dev/block/bootdevice/by-name/uefisecapp_b"
+if [ "$ddr4" = "true" ]; then
+   ui_print "Updating xbl for DDR4 RAM..."
+   package_extract_file "firmware-update/xbl.img" "/dev/block/bootdevice/by-name/xbl_a"
+   package_extract_file "firmware-update/xbl.img" "/dev/block/bootdevice/by-name/xbl_b"
+   ui_print "Updating xbl_config for DDR4 RAM..."
+   package_extract_file "firmware-update/xbl_config.img" "/dev/block/bootdevice/by-name/xbl_config_a"
+   package_extract_file "firmware-update/xbl_config.img" "/dev/block/bootdevice/by-name/xbl_config_b" 
+elif  [ "$ddr5" = "true" ]; then
+   ui_print "Updating xbl for DDR5 RAM..."
+   package_extract_file "firmware-update/xbl_lp5.img" "/dev/block/bootdevice/by-name/xbl_a"
+   package_extract_file "firmware-update/xbl_lp5.img" "/dev/block/bootdevice/by-name/xbl_b"
+   ui_print "Updating xbl_config for DDR5 RAM..."
+   package_extract_file "firmware-update/xbl_config_lp5.img" "/dev/block/bootdevice/by-name/xbl_config_a"
+   package_extract_file "firmware-update/xbl_config_lp5.img" "/dev/block/bootdevice/by-name/xbl_config_b"
+fi
+
+#super image
+unzip "$ZIPFILE" META-INF/zstd -d /dev/tmp
+chmod -R 0755 /dev/tmp
+
+package_extract_zstd "super.zst" "/dev/block/bootdevice/by-name/super"
+
+ui_print "- 清除缓存"
+rm -rf /data/dalvik-cache/arm/*
+rm -rf /data/dalvik-cache/arm64/*
+rm -rf /data/system/package_cache/*
+ui_print " "
+ui_print " "
+ui_print "- 刷机完毕"
+ui_print " "
+ui_print " "
+ui_print "- 如有红色挂载报错请直接忽略"
+ui_print "- 如有红色挂载报错请直接忽略"
+ui_print "- 如有红色挂载报错请直接忽略"
+ui_print " "
+ui_print " "
+
+exit 0

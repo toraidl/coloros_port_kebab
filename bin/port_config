@@ -1,0 +1,11 @@
+
+# 可能的super子分区列表
+possible_super_list=vendor system product odm my_engineering system_ext my_product my_stock my_heytap my_company my_carrier my_region my_preload my_bigball my_manifest
+
+# 打包为 ext4 文件系统（如果底包是erofs） true:是  false:否    意义：解锁system
+# Packing/Repacking target ROM filesystem with EXT4 or not. wiht EXT4, you can mount system parititon in read-write mode, which is not possible for EROFS filesystem. 
+repack_with_ext4=false
+
+# 去除data加密   true:是  false:否
+# Remove data encryption or not. if it is false, you cannot access encrypted-data partition in recovery without a A14 supported TWRP.
+remove_data_encryption=false
