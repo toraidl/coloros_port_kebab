@@ -225,6 +225,7 @@ fi
 rm -rf build/portrom/images/my_manifest
 cp -rf build/baserom/images/my_manifest build/portrom/images/
 cp -rf build/baserom/images/config/my_manifest_* build/portrom/images/config/
+sed -i "s/ro.build.display.id=.*/ro.build.display.id=${target_display_id}/g" build/portrom/images/my_manifest/build.prop
 rm -rf build/portrom/images/product/etc/auto-install*
 rm -rf build/portrom/images/system/verity_key
 rm -rf build/portrom/images/vendor/verity_key
