@@ -392,6 +392,13 @@ cp -rf build/baserom/images/my_product/etc/extension/sys_game_manager_config.jso
     echo "persist.oplus.display.vrr=1"
     echo "persist.oplus.display.initskipconfig=1"
 } >> build/portrom/images/my_product/build.prop 
+
+cp -rf build/baserom/images/my_product/etc/permissions/android.hardware.sensor.light.xml build/portrom/images/my_product/etc/permissions/
+cp -rf  build/baserom/images/my_product/etc/permissions/oplus.feature.android.xml  build/portrom/images/my_product/etc/permissions/
+cp -rf  build/baserom/images/my_product/etc/permissions/* build/portrom/images/my_product/etc/permissions/
+cp -rf  build/baserom/images/my_product/etc/refresh_rate_config.xml build/portrom/images/my_product/etc/refresh_rate_config.xml
+cp -rf  build/baserom/images/my_product/non_overlay build/portrom/images/my_product/non_overlay
+cp -rf  build/baserom/images/my_product/etc/sys_resolution_switch_config.xml build/portrom/images/my_product/etc/sys_resolution_switch_config.xml
 # bootanimation
 cp -rf build/baserom/images/my_product/media/bootanimation/* build/portrom/images/my_product/media/bootanimation/
 
