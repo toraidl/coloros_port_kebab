@@ -6,3 +6,4 @@ case $device_code in
 	#Others
 	*) size=9126805504;;
 esac
+echo $size
