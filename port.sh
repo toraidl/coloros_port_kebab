@@ -512,7 +512,7 @@ for pname in ${port_partition};do
     rm -rf build/portrom/images/${pname}.img
 done
 echo "${pack_type}">fstype.txt
-superSize=$(bash bin/getSuperSize.sh $device_code)
+superSize=$(bash bin/getSuperSize.sh $base_product_device)
 green "Super大小为${superSize}" "Super image size: ${superSize}"
 green "开始打包镜像" "Packing super.img"
 for pname in ${super_list};do
