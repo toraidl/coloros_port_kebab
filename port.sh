@@ -376,6 +376,8 @@ cp -rf build/baserom/images/my_product/etc/extension/sys_game_manager_config.jso
 
 cp -rf build/baserom/images/my_product/build.prop build/portrom/images/my_product/build.prop
 
+cp -rf build/baserom/images/my_product/app/com.oplus.vulkanLayer build/portrom/images/my_product/app/
+cp -rf build/baserom/images/my_product/app/com.oplus.gpudrivers.sm8250.api30 build/portrom/images/my_product/app/
 
 
 cp -rf build/baserom/images/my_product/etc/permissions/android.hardware.sensor.light.xml build/portrom/images/my_product/etc/permissions/
