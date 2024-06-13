@@ -87,8 +87,10 @@ fi
 blue "正在检测ROM底包" "Validating BASEROM.."
 if unzip -l ${baserom} | grep -q "payload.bin"; then
     baserom_type="payload"
+elif unzip -l ${baserom} | grep -q "br$";then
+    baserom_type="br"
 else
-    error "底包中未发现payload.bin，请重试" "payload.bin not found, please use ColorOS official OTA zip package."
+    error "底包中未发现payload.bin以及br文件，请使用ColorOS官方包后重试" "payload.bin/new.br not found, please use  ColorOS official OTA zip package."
     exit
 fi
 
@@ -126,6 +128,29 @@ if [[ ${baserom_type} == 'payload' ]];then
 
     blue "开始分解底包 [payload.bin]" "Unpacking BASEROM [payload.bin]"
     payload-dumper-go -o build/baserom/images/ build/baserom/payload.bin >/dev/null 2>&1 ||error "分解底包 [payload.bin] 时出错" "Unpacking [payload.bin] failed"
+elif [[ ${baserom_type} == 'br' ]];then
+    blue "正在提取底包 [new.dat.br]" "Extracting files from BASEROM [*.new.dat.br]"
+    unzip ${baserom} -d build/baserom  > /dev/null 2>&1 || error "解压底包 [new.dat.br]时出错" "Extracting [new.dat.br] error"
+    green "底包 [new.dat.br] 提取完毕" "[new.dat.br] extracted."
+    blue "开始分解底包 [new.dat.br]" "Unpacking BASEROM[new.dat.br]"
+    for file in build/baserom/*; do
+        filename=$(basename -- "$file")
+        extension="${filename##*.}"
+        name="${filename%.*}"
+
+        if [[ $name =~ [0-9] ]];then
+            new_name=$(echo "$name" | sed 's/[0-9]\+\(\.[^0-9]\+\)/\1/g')
+            new_name=$(echo "$new_name" | sed 's/\.\./\./g')
+            new_filename=$new_name.$extension
+
+            mv -fv $file build/baserom/$new_filename 
+        fi
+    done
+    for i in ${super_list}; do 
+        ${tools_dir}/brotli -d build/baserom/$i.new.dat.br >/dev/null 2>&1
+        sudo python3 ${tools_dir}/sdat2img.py build/baserom/$i.transfer.list build/baserom/$i.new.dat build/baserom/images/$i.img >/dev/null 2>&1
+        rm -rf build/baserom/$i.new.dat* build/baserom/$i.transfer.list build/baserom/$i.patch.*
+    done
 fi
 
 blue "正在提取移植包 [payload.bin]" "Extracting files from PORTROM [payload.bin]"
@@ -577,15 +602,66 @@ mkdir -p out/${os_type}_${device_code}_${port_rom_version}/firmware-update
 cp -rf bin/flash/platform-tools-windows out/${os_type}_${device_code}_${port_rom_version}/
 cp -rf bin/flash/windows_flash_script.bat out/${os_type}_${device_code}_${port_rom_version}/
 cp -rf bin/flash/mac_linux_flash_script.sh out/${os_type}_${device_code}_${port_rom_version}/
+cp -rf bin/flash/zstd out/${os_type}_${device_code}_${port_rom_version}/META-INF/
+mv -f build/portrom/*.zst out/${os_type}_${device_code}_${port_rom_version}/
+
+cp -rf bin/flash/update-binary out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/
+
+if [[ $is_ab_device = "false" ]];then
+    mv -f build/baserom/images/*.img out/${os_type}_${device_code}_${port_rom_version}/firmware-update
+    for fwimg in $(ls out/${os_type}_${device_code}_${port_rom_version}/firmware-update |cut -d "." -f 1 |grep -vE "super|cust|preloader");do
+        if [[ $fwimg == *"xbl"* ]] || [[ $fwimg == *"dtbo"* ]] ;then
+            # Warning: If wrong xbl img has been flashed, it will cause phone hard brick, so we just skip it with fastboot mode.
+            continue
+        elif [[ $fwimg == "mdm_oem_stanvbk" ]] || [[ $fwimg == "spunvm" ]] ;then
+            sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe flash "${fwimg}" firmware-update\/"${fwimg}".img" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
+        elif [ "$(echo ${fwimg} |grep vbmeta)" != "" ];then
+            sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe --disable-verity --disable-verification flash "${fwimg}" firmware-update\/"${fwimg}".img" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
+        else
+            sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe flash "${fwimg}" firmware-update\/"${fwimg}".img" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
+        fi
+    done
+    sed -i "/_b/d" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
+    sed -i "s/_a//g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
+    sed -i '/^REM SET_ACTION_SLOT_A_BEGIN/,/^REM SET_ACTION_SLOT_A_END/d' out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
+
+else
+    mv -f build/baserom/*.img out/${os_type}_${device_code}_${port_rom_version}/firmware-update
+    for fwimg in $(ls out/${os_type}_${device_code}_${port_rom_version}/firmware-update |cut -d "." -f 1 |grep -vE "super|cust|preloader");do
+        if [[ $fwimg == *"xbl"* ]] || [[ $fwimg == *"dtbo"* ]] || [[ $fwimg == *"reserve"* ]];then
+            # Warning: If wrong xbl img has been flashed, it will cause phone hard brick, so we just skip it with fastboot mode.
+            continue
+        elif [[ $fwimg == "mdm_oem_stanvbk" ]] || [[ $fwimg == "spunvm" ]] ;then
+            sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe flash "${fwimg}" firmware-update\/"${fwimg}".img" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
+        elif [ "$(echo ${fwimg} |grep vbmeta)" != "" ];then
+            sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe --disable-verity --disable-verification flash "${fwimg}"_b firmware-update\/"${fwimg}".img" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
+            sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe --disable-verity --disable-verification flash "${fwimg}"_a firmware-update\/"${fwimg}".img" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
+        else
+            sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe flash "${fwimg}"_b firmware-update\/"${fwimg}".img" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
+            sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe flash "${fwimg}"_a firmware-update\/"${fwimg}".img" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
+        fi
+    done
+fi
+
+sed -i "s/device_code/${base_product_device}/g" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
+sed -i "s/device_code/${base_product_device}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
+
+sed -i "s/portversion/${port_rom_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
+sed -i "s/baseversion/${base_rom_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
+sed -i "s/andVersion/${port_android_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
+sed -i "s/device_code/${base_product_device}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
+
+busybox unix2dos out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
+
  #disable vbmeta
 for img in $(find out/${os_type}_${device_code}_${port_rom_version}/ -type f -name "vbmeta*.img");do
     python3 bin/patch-vbmeta.py ${img} > /dev/null 2>&1
 done
-cp -rf bin/flash/update-binary out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/
-cp -rf bin/flash/zstd out/${os_type}_${device_code}_${port_rom_version}/META-INF/
+
 ksu_bootimg_file=$(find devices/$base_product_device/ -type f -name "*boot_ksu.img")
 nonksu_bootimg_file=$(find devices/$base_product_device/ -type f -name "*boot_noksu.img")
 custom_bootimg_file=$(find devices/$base_product_device/ -type f -name "*boot_custom.img")
+
 if [[ -f $nonksu_bootimg_file ]];then
     nonksubootimg=$(basename "$nonksu_bootimg_file")
     mv -f $nonksu_bootimg_file out/${os_type}_${device_code}_${port_rom_version}/
@@ -623,37 +699,6 @@ elif [[ -f "$custom_bootimg_file" ]];then
     sed -i "s/dtbo_tv.img/dtbo_custom.img/g" out/${os_type}_${device_code}_${port_rom_version}/mac_linux_flash_script.sh
     
 fi
-
-mv -f build/portrom/*.zst out/${os_type}_${device_code}_${port_rom_version}/
-mv -f build/baserom/images/*.img out/${os_type}_${device_code}_${port_rom_version}/firmware-update
-
-cp -rf bin/flash/update-binary out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/
-cp -rf bin/flash/platform-tools-windows out/${os_type}_${device_code}_${port_rom_version}/
-cp -rf bin/flash/windows_flash_script.bat out/${os_type}_${device_code}_${port_rom_version}/
-
-for fwimg in $(ls out/${os_type}_${device_code}_${port_rom_version}/firmware-update |cut -d "." -f 1 |grep -vE "super|cust|preloader");do
-    if [[ $fwimg == *"xbl"* ]] || [[ $fwimg == *"dtbo"* ]] ;then
-        # Warning: If wrong xbl img has been flashed, it will cause phone hard brick, so we just skip it with fastboot mode.
-        continue
-    elif [[ $fwimg == "mdm_oem_stanvbk" ]] || [[ $fwimg == "spunvm" ]] ;then
-        sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe flash "${fwimg}" firmware-update\/"${fwimg}".img" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
-    elif [ "$(echo ${fwimg} |grep vbmeta)" != "" ];then
-        sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe --disable-verity --disable-verification flash "${fwimg}"_b firmware-update\/"${fwimg}".img" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
-        sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe --disable-verity --disable-verification flash "${fwimg}"_a firmware-update\/"${fwimg}".img" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
-    else
-        sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe flash "${fwimg}"_b firmware-update\/"${fwimg}".img" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
-        sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe flash "${fwimg}"_a firmware-update\/"${fwimg}".img" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
-    fi
-done
-sed -i "s/device_code/${base_product_device}/g" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
-
-sed -i "s/portversion/${port_rom_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
-sed -i "s/baseversion/${base_rom_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
-sed -i "s/andVersion/${port_android_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
-sed -i "s/device_code/${base_product_device}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
-
-busybox unix2dos out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
-
 
 find out/${os_type}_${device_code}_${port_rom_version} |xargs touch
 pushd out/${os_type}_${device_code}_${port_rom_version}/ >/dev/null || exit

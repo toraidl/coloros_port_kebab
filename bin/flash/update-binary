@@ -23,7 +23,7 @@ package_extract_zstd() {
 # Device check
 supported=false
 ui_print "Checking device compatibility..."
-for i in 19805 20809; do
+for i in 19805 20809 20828; do
   for prop in "ro.boot.prjname" "ro.boot.project_name"; do
     if [ "$(getprop $prop)" == "$i" ]; then
       ui_print "- Supported Device detected"
@@ -55,9 +55,9 @@ fi
 
 ui_print " "
 ui_print "****************************"
-ui_print "Device: Oneplus 8T"
+ui_print "Device: device_code"
 ui_print "Region: CN"
-ui_print "Flashing Firmware to both slots A and B..."
+ui_print "Flashing Firmware..."
 ui_print " "
 ui_print "Updating modem..."
 package_extract_file "firmware-update/modem.img" "/dev/block/bootdevice/by-name/modem_a"
