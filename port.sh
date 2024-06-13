@@ -395,6 +395,8 @@ rm -rf  build/portrom/images/my_product/priv-app/*
 rm -rf  build/portrom/images/my_product/app/OplusCamera
 cp -rf build/baserom/images/my_product/priv-app/* build/portrom/images/my_product/priv-app
 
+cp -rf  build/baserom/images/my_product/product_overlay/*  build/portrom/images/my_product/product_overlay/
+
 # bootanimation
 cp -rf build/baserom/images/my_product/media/bootanimation/* build/portrom/images/my_product/media/bootanimation/
 
