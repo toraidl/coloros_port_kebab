@@ -284,6 +284,26 @@ yellow "删除多余的App" "Debloating..."
 # List of apps to be removed
 
 debloat_apps=("Update" "OTA")
+kept_apps=("Clock" "FileManager" "KeKeThemeSpace")
+
+if [[ $base_product_device == "OnePlus8T" ]];then
+    for delapp in $(find build/portrom/images/ -maxdepth 3 -path "*/del-app/*" -type d ); do
+        app_name=$(basename ${delapp})
+        
+        keep=false
+        for kept_app in "${kept_apps[@]}"; do
+            if [[ $app_name == $kept_app ]]; then
+                keep=true
+                break
+            fi
+        done
+        
+        if [[ $keep == false ]]; then
+            debloat_apps+=("$app_name")
+        fi
+
+    done
+fi
 
 for debloat_app in "${debloat_apps[@]}"; do
     # Find the app directory
