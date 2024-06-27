@@ -421,10 +421,11 @@ sed -i "s/persist.oplus.software.alertslider.location=.*/persist.oplus.software.
 cp -rf build/baserom/images/my_product/app/com.oplus.vulkanLayer build/portrom/images/my_product/app/
 cp -rf build/baserom/images/my_product/app/com.oplus.gpudrivers.sm8250.api30 build/portrom/images/my_product/app/
 
+rm -rf build/portrom/images/my_product/etc/permissions/*
+cp -rf build/baserom/images/my_product/etc/permissions/* build/portrom/images/my_product/etc/permissions/
 
-cp -rf build/baserom/images/my_product/etc/permissions/android.hardware.sensor.light.xml build/portrom/images/my_product/etc/permissions/
-cp -rf  build/baserom/images/my_product/etc/permissions/oplus.feature.android.xml  build/portrom/images/my_product/etc/permissions/
-cp -rf  build/baserom/images/my_product/etc/permissions/* build/portrom/images/my_product/etc/permissions/
+rm -rf build/portrom/images/my_product/etc/extension/*
+cp -rf build/baserom/images/my_product/etc/extension/* build/portrom/images/my_product/etc/extension/
 cp -rf  build/baserom/images/my_product/etc/refresh_rate_config.xml build/portrom/images/my_product/etc/refresh_rate_config.xml
 cp -rf  build/baserom/images/my_product/non_overlay build/portrom/images/my_product/non_overlay
 cp -rf  build/baserom/images/my_product/etc/sys_resolution_switch_config.xml build/portrom/images/my_product/etc/sys_resolution_switch_config.xml
