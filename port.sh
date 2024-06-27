@@ -230,7 +230,7 @@ port_rom_model=$(< build/portrom/images/my_manifest/build.prop grep "ro.product.
 green "机型代号: 底包为 [${base_rom_model}], 移植包为 [${port_rom_model}]" "Product Model: BASEROM: [${base_rom_model}], PORTROM: [${port_rom_model}]"
 
 base_market_name=$(< build/portrom/images/odm/build.prop grep "ro.vendor.oplus.market.name" |awk 'NR==1' |cut -d '=' -f 2)
-port_market_name=$(< build/portrom/images/my_manifest/build.prop grep "ro.vendor.oplus.market.name" |awk 'NR==1' |cut -d '=' -f 2)
+port_market_name=$(grep -r --include="*.prop"  --exclude-dir="odm" "ro.vendor.oplus.market.name" build/portrom/images/ | head -n 1 | awk "NR==1" | cut -d "=" -f2)
 
 green "机型代号: 底包为 [${base_market_name}], 移植包为 [${port_market_name}]" "Market Name: BASEROM: [${base_market_name}], PORTROM: [${port_market_name}]"
 
