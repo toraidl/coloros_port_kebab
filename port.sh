@@ -240,6 +240,9 @@ port_my_product_type=$(< build/portrom/images/my_product/build.prop grep "ro.opl
 target_display_id=$(< build/portrom/images/my_manifest/build.prop grep "ro.build.display.id" |awk 'NR==1' |cut -d '=' -f 2 | sed 's/$port_device_code/$base_device_code)/g')
 
 green "机型代号: 底包为 [${base_rom_model}], 移植包为 [${port_rom_model}]" "My Product Type: BASEROM: [${base_rom_model}], PORTROM: [${port_rom_model}]"
+# Security Patch Date
+portrom_version_security_patch=$(< build/portrom/images/my_manifest/build.prop grep "ro.build.version.security_patch" |awk 'NR==1' |cut -d '=' -f 2 )
+
 if grep -q "ro.build.ab_update=true" build/portrom/images/vendor/build.prop;  then
     is_ab_device=true
 else
@@ -251,6 +254,7 @@ rm -rf build/portrom/images/my_manifest
 cp -rf build/baserom/images/my_manifest build/portrom/images/
 cp -rf build/baserom/images/config/my_manifest_* build/portrom/images/config/
 sed -i "s/ro.build.display.id=.*/ro.build.display.id=${target_display_id}/g" build/portrom/images/my_manifest/build.prop
+sed -i "s/ro.build.version.security_patch=.*/ro.build.version.security_patch=${portrom_version_security_patch}/g" build/portrom/images/my_manifest/build.prop
 
 if [[ ! -d tmp ]];then
     mkdir -p tmp/
