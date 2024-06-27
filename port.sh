@@ -431,6 +431,8 @@ cp -rf  build/baserom/images/my_product/non_overlay build/portrom/images/my_prod
 cp -rf  build/baserom/images/my_product/etc/sys_resolution_switch_config.xml build/portrom/images/my_product/etc/sys_resolution_switch_config.xml
 add_feature "com.android.systemui.support_media_show" build/portrom/images/my_product/etc/extension/com.oplus.app-features.xml
 
+add_feature "oplus.software.support_blockable_animation" build/portrom/images/my_product/etc/extension/com.oplus.oplus-feature.xml
+
  # Camera
 cp -rf  build/baserom/images/my_product/etc/camera/* build/portrom/images/my_product/etc/camera
 cp -rf  build/baserom/images/my_product/vendor/etc/* build/portrom/images/my_product/vendor/etc/
