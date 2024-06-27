@@ -389,16 +389,14 @@ done
 #sed -i -e '$a\'$'\n''persist.sys.usb.config=mtp,adb' build/portrom/images/system/system/build.prop
 #sed -i -e '$a\'$'\n''persist.sys.disable_rescue=true' build/portrom/images/system/system/build.prop
 
+base_rom_density=$(grep "ro.sf.lcd_density" --include="*.prop" -r build/baserom/images/my_product | head -n 1 | cut -d "=" -f2)
 [ -z ${base_rom_density} ] && base_rom_density=480
 
-found=0
-for prop in $(find build/portrom/images/my_product -type f -name "build.prop");do
-    if grep -q "ro.sf.lcd_density" ${prop};then
-        sed -i "s/ro.sf.lcd_density=.*/ro.sf.lcd_density=${base_rom_density}/g" ${prop}
-        found=1
+if grep -q "ro.sf.lcd_density" build/portrom/images/my_product/build.prop ;then
+        sed -i "s/ro.sf.lcd_density=.*/ro.sf.lcd_density=${base_rom_density}/g" build/portrom/images/my_product/build.prop
+else
+        echo "ro.sf.lcd_density=${base_rom_density}" >> build/portrom/images/my_product/build.prop
     fi
-done
-
 
 # fix bootloop
 cp -rf build/baserom/images/my_product/etc/extension/sys_game_manager_config.json build/portrom/images/my_product/etc/extension/
