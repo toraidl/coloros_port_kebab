@@ -279,3 +279,17 @@ patch_kernel_to_bootimg() {
     rm -rf ${work_dir}/tmp/boot
     cd $work_dir
 }
+
+add_feature() {
+    feature=$1
+    file=$2
+    parent_node=$(xmlstarlet sel -t -m "/*" -v "name()" "$file")
+    feature_node=$(xmlstarlet sel -t -m "/*/*" -v "name()" -n "$file" | head -n 1)
+
+    if  grep -nq "$feature" $file ; then
+        blue "功能${feature}已存在，跳过" "Feature $feature already exists, skipping..."
+    else
+        blue "添加功能: $feature" "Adding feature $feature"
+        sed -i "/<\/$parent_node>/i\\\t\\<$feature_node name=\"$feature\" \/>" "$file"
+    fi
+}
