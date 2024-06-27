@@ -401,6 +401,17 @@ else
 # fix bootloop
 cp -rf build/baserom/images/my_product/etc/extension/sys_game_manager_config.json build/portrom/images/my_product/etc/extension/
 
+props=("ro.oplus.display.screenSizeInches.primary" "ro.display.rc.size" "ro.oplus.display.rc.size" "ro.oppo.screen.heteromorphism" "ro.oplus.display.screen.heteromorphism" "ro.oppo.screenhole.positon" "ro.oplus.display.screenhole.positon" "ro.lcd.display.screen.underlightsensor.region" "ro.oplus.lcd.display.screen.underlightsensor.region")
+for prop in "${props[@]}" ; do
+    base_prop_value=$(grep "$prop=" build/baserom/images/my_product/build.prop | cut -d '=' -f2)
+    target_prop_value=$(grep "$prop=" build/portrom/images/my_product/build.prop | cut -d '=' -f2)
+    if [[ -n $target_prop_value ]];then
+        sed -i "s|${prop}=.*|${prop}=${base_prop_value}|g" build/portrom/images/my_product/build.prop
+    else
+        echo "${prop}=$base_prop_value" >> build/portrom/images/my_product/build.prop
+    fi
+done
+
 sed -i "s/persist.oplus.software.audio.right_volume_key=.*/persist.oplus.software.audio.right_volume_key=false/g" build/portrom/images/my_product/build.prop
 sed -i "s/persist.oplus.software.alertslider.location=.*/persist.oplus.software.alertslider.location=/g" build/portrom/images/my_product/build.prop
 
