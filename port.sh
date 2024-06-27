@@ -600,9 +600,22 @@ done
 rm fstype.txt
 
 # 打包 super.img
+if [[ $is_ab_device = "false" ]];then
+    blue "打包A-only机型 super.img" "Packing super.img for A-only device"
+    lpargs="-F --output build/portrom/images/super.img --metadata-size 65536 --super-name super --metadata-slots 2 --device super:$superSize --group=qti_dynamic_partitions:$superSize"
+    for pname in ${super_list};do
+        if [ -f "build/portrom/images/${pname}.img" ];then
+            subsize=$(du -sb build/portrom/images/${pname}.img |tr -cd 0-9)
+            green "Super 子分区 [$pname] 大小 [$subsize]" "Super sub-partition [$pname] size: [$subsize]"
+            args="--partition ${pname}:none:${subsize}:qti_dynamic_partitions --image ${pname}=build/portrom/images/${pname}.img"
+            lpargs="$lpargs $args"
+            unset subsize
+            unset args
+        fi
+    done
+else
 blue "打包V-A/B机型 super.img" "Packing super.img for V-AB device"
 lpargs="-F --virtual-ab --output build/portrom/images/super.img --metadata-size 65536 --super-name super --metadata-slots 3 --device super:$superSize --group=qti_dynamic_partitions_a:$superSize --group=qti_dynamic_partitions_b:$superSize"
-
 for pname in ${super_list};do
     if [ -f "build/portrom/images/${pname}.img" ];then
         subsize=$(du -sb build/portrom/images/${pname}.img |tr -cd 0-9)
@@ -613,6 +626,8 @@ for pname in ${super_list};do
         unset args
     fi
 done
+fi
+
 lpmake $lpargs
 #echo "lpmake $lpargs"
 if [ -f "build/portrom/images/super.img" ];then
@@ -642,7 +657,7 @@ mv -f build/portrom/*.zst out/${os_type}_${device_code}_${port_rom_version}/
 cp -rf bin/flash/update-binary out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/
 
 if [[ $is_ab_device = "false" ]];then
-    mv -f build/baserom/images/*.img out/${os_type}_${device_code}_${port_rom_version}/firmware-update
+    mv -f build/baserom/firmware-update/*.img out/${os_type}_${rom_version}/firmware-update
     for fwimg in $(ls out/${os_type}_${device_code}_${port_rom_version}/firmware-update |cut -d "." -f 1 |grep -vE "super|cust|preloader");do
         if [[ $fwimg == *"xbl"* ]] || [[ $fwimg == *"dtbo"* ]] ;then
             # Warning: If wrong xbl img has been flashed, it will cause phone hard brick, so we just skip it with fastboot mode.
