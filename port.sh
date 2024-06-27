@@ -41,7 +41,7 @@ check unzip aria2c 7z zip java zipalign python3 zstd bc xmlstarlet
 # 可在 bin/port_config 中更改
 super_list=$(grep "possible_super_list" bin/port_config |cut -d '=' -f 2)
 repackext4=$(grep "repack_with_ext4" bin/port_config |cut -d '=' -f 2)
-
+super_extended=$(grep "super_extended" bin/port_config |cut -d '=' -f 2)
 if [[ ${repackext4} == true ]]; then
     pack_type=EXT
 else

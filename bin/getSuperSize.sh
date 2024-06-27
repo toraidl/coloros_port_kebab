@@ -4,6 +4,6 @@ case $device_code in
 	OnePlus9R) size=9932111872;;
 	OnePlus8T) size=7516192768;;
 	#Others
-	*) size=9126805504;;
+	*) size=11811160064;;
 esac
 echo $size
