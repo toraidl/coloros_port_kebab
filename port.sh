@@ -687,13 +687,26 @@ if [[ $is_ab_device = "false" ]];then
         if [[ $fwimg == *"xbl"* ]] || [[ $fwimg == *"dtbo"* ]] ;then
             # Warning: If wrong xbl img has been flashed, it will cause phone hard brick, so we just skip it with fastboot mode.
             continue
-        elif [[ $fwimg == "mdm_oem_stanvbk" ]] || [[ $fwimg == "spunvm" ]] ;then
-            sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe flash "${fwimg}" firmware-update\/"${fwimg}".img" out/${os_type}_${rom_version}/windows_flash_script.bat
-        elif [ "$(echo ${fwimg} |grep vbmeta)" != "" ];then
-            sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe --disable-verity --disable-verification flash "${fwimg}" firmware-update\/"${fwimg}".img" out/${os_type}_${rom_version}/windows_flash_script.bat
+
+        elif [[ ${fwimg} == "BTFM" ]];then
+            part="bluetooth"
+        elif [[ ${fwimg} == "cdt_engineering" ]];then
+            part="engineering_cdt"
+        elif [[ ${fwimg} == "BTFM" ]];then
+            part="bluetooth"
+        elif [[ ${fwimg} == "dspso" ]];then
+            part="dsp"
+        elif [[ ${fwimg} == "keymaster64" ]];then
+            part="keymaster"
+        elif [[ ${fwimg} == "qupv3fw" ]];then
+            part="qupfw"
+        elif [[ ${fwimg} == "static_nvbk" ]];then
+            part="static_nvbk"
         else
-            sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe flash "${fwimg}" firmware-update\/"${fwimg}".img" out/${os_type}_${rom_version}/windows_flash_script.bat
+            part=${fwimg}                
         fi
+
+        sed -i "/REM firmware/a \\\platform-tools-windows\\\fastboot.exe flash "${part}" firmware-update\/"${fwimg}".img" out/${os_type}_${rom_version}/windows_flash_script.bat
     done
     sed -i "/_b/d" out/${os_type}_${rom_version}/META-INF/com/google/android/update-binary
     sed -i "s/_a//g" out/${os_type}_${rom_version}/META-INF/com/google/android/update-binary
