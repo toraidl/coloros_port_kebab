@@ -8,7 +8,7 @@
 
 # Test Base ROM: OnePlus 8T (ColorOS_14.0.0.600)
 
-# Test Port ROM: OnePlus 12 (ColorOS_14.0.0.800), OnePlus ACE3V(ColorOS_14.0.1.621)
+# Test Port ROM: OnePlus 12 (ColorOS_14.0.0.810), OnePlus ACE3V(ColorOS_14.0.1.621) Realme GT Neo5 240W(RMX3708_14.0.0.800)
 
 build_user="Bruce Teng"
 build_host=$(hostname)
@@ -240,6 +240,10 @@ port_my_product_type=$(< build/portrom/images/my_product/build.prop grep "ro.opl
 target_display_id=$(< build/portrom/images/my_manifest/build.prop grep "ro.build.display.id" |awk 'NR==1' |cut -d '=' -f 2 | sed 's/$port_device_code/$base_device_code)/g')
 
 green "机型代号: 底包为 [${base_rom_model}], 移植包为 [${port_rom_model}]" "My Product Type: BASEROM: [${base_rom_model}], PORTROM: [${port_rom_model}]"
+
+base_vendor_brand=$(< build/baserom/images/my_manifest/build.prop grep "ro.product.vendor.brand" |awk 'NR==1' |cut -d '=' -f 2)
+port_vendor_brand=$(< build/portrom/images/my_manifest/build.prop grep "ro.product.vendor.brand" |awk 'NR==1' |cut -d '=' -f 2)
+
 # Security Patch Date
 portrom_version_security_patch=$(< build/portrom/images/my_manifest/build.prop grep "ro.build.version.security_patch" |awk 'NR==1' |cut -d '=' -f 2 )
 
@@ -468,6 +472,8 @@ add_feature "oplus.software.game_engine_vibrator_v1.support" build/portrom/image
 #Reno 12 Feature 
 add_feature 'os.personalization.wallpaper.live.ripple.enable" args="boolean:true' build/portrom/images/my_product/etc/extension/com.oplus.app-features.xml
 add_feature "os.personalization.flip.agile_window.enable" build/portrom/images/my_product/etc/extension/com.oplus.app-features.xml
+# Oneplus Alert Slider, Needed for RealmeUI
+add_feature  "oplus.software.audio.alert_slider" build/portrom/images/my_product/etc/permissions/oplus.product.feature_multimedia_unique.xml
 
  # Camera
 cp -rf  build/baserom/images/my_product/etc/camera/* build/portrom/images/my_product/etc/camera
@@ -660,10 +666,11 @@ else
     error "无法打包 super.img"  "Unable to pack super.img."
     exit 1
 fi
-for pname in ${super_list};do
-    rm -rf build/portrom/images/${pname}.img
-done
+if [[ ${port_vendor_brand} == "realme" ]];then
+    os_type="RealmeUI"
+else
 os_type="ColorOS"
+fi
 rom_version=$(cat build/portrom/images/my_manifest/build.prop | grep "ro.build.display.id=" |  awk 'NR==1' | cut -d "=" -f2 | cut -d "(" -f1)
 
 blue "正在压缩 super.img" "Comprising super.img"
