@@ -417,6 +417,7 @@ done
 
 sed -i "s/persist.oplus.software.audio.right_volume_key=.*/persist.oplus.software.audio.right_volume_key=false/g" build/portrom/images/my_product/build.prop
 sed -i "s/persist.oplus.software.alertslider.location=.*/persist.oplus.software.alertslider.location=/g" build/portrom/images/my_product/build.prop
+sed -i "s/persist.sys.oplus.anim_level=.*/persist.sys.oplus.anim_level=2/g" build/portrom/images/my_product/build.prop
 
 cp -rf build/baserom/images/my_product/app/com.oplus.vulkanLayer build/portrom/images/my_product/app/
 cp -rf build/baserom/images/my_product/app/com.oplus.gpudrivers.sm8250.api30 build/portrom/images/my_product/app/
