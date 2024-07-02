@@ -422,14 +422,13 @@ sed -i "s/persist.sys.oplus.anim_level=.*/persist.sys.oplus.anim_level=2/g" buil
 cp -rf build/baserom/images/my_product/app/com.oplus.vulkanLayer build/portrom/images/my_product/app/
 cp -rf build/baserom/images/my_product/app/com.oplus.gpudrivers.sm8250.api30 build/portrom/images/my_product/app/
 
-rm -rf build/portrom/images/my_product/etc/permissions/*
-cp -rf build/baserom/images/my_product/etc/permissions/* build/portrom/images/my_product/etc/permissions/
 
-rm -rf build/portrom/images/my_product/etc/extension/*
-cp -rf build/baserom/images/my_product/etc/extension/* build/portrom/images/my_product/etc/extension/
 cp -rf  build/baserom/images/my_product/etc/refresh_rate_config.xml build/portrom/images/my_product/etc/refresh_rate_config.xml
 cp -rf  build/baserom/images/my_product/non_overlay build/portrom/images/my_product/non_overlay
+
 cp -rf  build/baserom/images/my_product/etc/sys_resolution_switch_config.xml build/portrom/images/my_product/etc/sys_resolution_switch_config.xml
+
+cp -rf build/baserom/images/my_product/etc/permissions/com.oplus.sensor_config.xml build/portrom/images/my_product/etc/permissions/
 add_feature "com.android.systemui.support_media_show" build/portrom/images/my_product/etc/extension/com.oplus.app-features.xml
 
 add_feature "oplus.software.support_blockable_animation" build/portrom/images/my_product/etc/extension/com.oplus.oplus-feature.xml
@@ -441,6 +440,34 @@ features=("oplus.software.display.intelligent_color_temperature_support" "oplus.
 for feature in "${features[@]}" ; do 
     add_feature "$feature" "build/portrom/images/my_product/etc/permissions/oplus.product.display_features.xml"
 done
+
+#Virbation feature
+add_feature "oplus.software.vibration_intensity_ime" build/portrom/images/my_product/etc/permissions/oplus.feature.android.xml
+add_feature "oplus.software.vibration_tripartite_adaptation" build/portrom/images/my_product/etc/permissions/oplus.feature.android.xml
+remove_feature "oplus.software.vibrator_qcom_lmvibrator" 
+remove_feature "oplus.software.vibrator_richctap" 
+remove_feature "oplus.software.vibrator_luxunvibrator" 
+remove_feature "oplus.software.haptic_vibrator_v1.support" 
+remove_feature "oplus.software.haptic_vibrator_v2.support" 
+remove_feature "oplus.hardware.vibrator_oplus_v1" 
+remove_feature "oplus.hardware.vibrator_xlinear_type"
+remove_feature "oplus.hardware.vibrator_style_switch"
+
+# Disable DPI switch
+remove_feature "oplus.software.display.resolution_switch_support"
+
+remove_feature "oplus.software.view.rgbnormalize"
+#Remove Wireless charge support
+remove_feature "os.charge.settings.wirelesscharge.support" 
+remove_feature "oplus.power.onwirelesscharger.support"
+remove_feature "com.oplus.battery.wireless.charging.notificate"
+
+#Display Colormode 
+add_feature "oplus.software.display.colormode_calibrate_p3_65_support" build/portrom/images/my_product/etc/permissions/oplus.product.feature_multimedia_unique.xml
+add_feature "oplus.software.game_engine_vibrator_v1.support" build/portrom/images/my_product/etc/permissions/oplus.product.features_gameeco_common.xml
+#Reno 12 Feature 
+add_feature 'os.personalization.wallpaper.live.ripple.enable" args="boolean:true' build/portrom/images/my_product/etc/extension/com.oplus.app-features.xml
+add_feature "os.personalization.flip.agile_window.enable" build/portrom/images/my_product/etc/extension/com.oplus.app-features.xml
 
  # Camera
 cp -rf  build/baserom/images/my_product/etc/camera/* build/portrom/images/my_product/etc/camera
@@ -467,15 +494,11 @@ if [ -f "${baseCarrierConfigOverlay}" ] && [ -f "${portCarrierConfigOverlay}" ];
     cp -rf ${baseCarrierConfigOverlay} $(dirname ${portCarrierConfigOverlay})
 fi
 
-# fix fingerprint & face unlock
-for feature in android.hardware.biometrics.face android.hardware.fingerprint;do
-    if ! xmlstarlet sel -t -c "//permissions/feature[@name='$feature']"  build/portrom/images/my_product/etc/permissions/com.oplus.android-features.xml  >/dev/null 2>&1;then 
-        echo "Adding feature $feature"
-        xmlstarlet ed -L -s "//permissions" -t elem -n feature -v "" \
-            -i "//permissions/feature[last()]" -t attr -n "name" -v "$feature" build/portrom/images/my_product/etc/permissions/com.oplus.android-features.xml
+add_feature "android.hardware.biometrics.face"  build/portrom/images/my_product/etc/permissions/com.oplus.android-features.xml
 
-    fi
-done
+add_feature "android.hardware.fingerprint" build/portrom/images/my_product/etc/permissions/com.oplus.android-features.xml
+
+add_feature "oplus.software.display.eyeprotect_paper_textre_support" build/portrom/images/my_product/etc/permissions/oplus.product.feature_multimedia_unique.xml
 
 
 #自定义替换

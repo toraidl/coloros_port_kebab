@@ -285,11 +285,25 @@ add_feature() {
     file=$2
     parent_node=$(xmlstarlet sel -t -m "/*" -v "name()" "$file")
     feature_node=$(xmlstarlet sel -t -m "/*/*" -v "name()" -n "$file" | head -n 1)
-
-    if  grep -nq "$feature" $file ; then
+    found=0
+    for xml in $(find build/portrom/images/my_product/etc/ -type f -name "*.xml");do
+        if  grep -nq "$feature" $xml ; then
         blue "功能${feature}已存在，跳过" "Feature $feature already exists, skipping..."
-    else
+            found=1
+        fi
+    done
+    if [[ $found == 0 ]] ; then
         blue "添加功能: $feature" "Adding feature $feature"
         sed -i "/<\/$parent_node>/i\\\t\\<$feature_node name=\"$feature\" \/>" "$file"
     fi
+}
+
+remove_feature() {
+    feature=$1
+    for file in $(find build/portrom/images/my_product/etc/ -type f -name "*.xml");do
+        if  grep -nq "$feature" $file ; then
+            blue "删除$feature..." "Deleting $feature from $(basename $file)..."
+            sed -i "/name=\"$feature/d" "$file"
+        fi
+    done
 }
